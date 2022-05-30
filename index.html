@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper - Made using WASM in Rust</title>
+
+    <style>
+        body {
+            position: relative;
+            display: grid;
+            place-items: center;
+            font-family: Verdana, sans-serif;
+        }
+
+        #root {
+            --rows: 10;
+            --cols: 10;
+            display: inline-grid;
+            grid-template: repeat(var(--rows), auto) / repeat(var(--cols), auto);
+        }
+        
+        .field {
+            cursor: pointer;
+            text-align: center;
+            width: 1.2rem;
+            height: 1.2rem;
+            line-height: 1.2rem;
+        }
+
+        #msg {
+            position: absolute;
+            top: 40vh;
+            left: 47vw;
+            transform: translate(-50%, -50%);
+            border: 2px solid palevioletred;
+            background-color: greenyellow;
+            color: blueviolet;
+            padding: 0.8rem;
+            margin: 0.4rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="msg">Game Over!!</div>
+    <div id="root"></div>
+
+    <script type="module">
+        import init, { getState, openField, toggleFlag, isLost, isWon } from "./pkg/minesweeper.js"
+
+        function render(state) {
+            const root = document.getElementById("root")
+            const msg  = document.getElementById("msg")
+            root.innerHTML = ""
+
+            let data = state.trim().split("\n").map(row => row.trim().split(/\s+/))
+            
+            root.style.setProperty('--rows', data.length)
+            root.style.setProperty('--cols', data[0].length)
+
+            for (let y=0; y<data.length; y++) {
+
+                for (let x=0; x<data[y].length; x++) {
+                    let element = document.createElement("span")
+                    element.classList.add("field")
+                    element.href = "#"
+                    element.innerText = data[y][x]
+
+                    element.addEventListener('click', () => {
+                        openField(x, y)
+                        render(getState())
+                    })
+
+                    element.addEventListener("contextmenu", (event) => {
+                        event.preventDefault()
+                        toggleFlag(x, y)
+                        render(getState())
+                    })
+
+                    root.appendChild(element)
+                }
+            }
+
+            if (isLost()) {
+                msg.style.display = 'block'
+            }
+
+            if (isWon()) {
+                msg.style.display = 'block'
+                msg.innerText = "You Won!!🎉✨!!"
+            }
+        }
+
+        async function main() {
+            await init()
+            let gameState = getState()
+            render(gameState)
+        }
+
+        main()
+    </script>
+</body>
+</html>
