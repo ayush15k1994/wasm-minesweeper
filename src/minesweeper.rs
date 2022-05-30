@@ -166,7 +166,7 @@ impl Minesweeper {
             return false
         } 
 
-        if (self.flagged_fields.len() + self.open_fields.len() == self.height * self.width) {
+        if self.flagged_fields.len() + self.open_fields.len() == self.height * self.width {
             return true
         }
 
